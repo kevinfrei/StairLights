@@ -66,15 +66,15 @@ bool HandleGet(const String& get, WiFiClient& client) {
     return false;
   }
   Serial.printf("Searching (pos = %d)!", pos);
-  for (const WebMap& item : FileList) {
+  for (const WebFile &item : FileList) {
     // Starts with 'GET /': 5 characters, right?
-    if (item.pathLen == pos - 5 && get.indexOf(item.path) == 5) {
-      Serial.printf("Got %s", item.path);
+    if (item.pathname.len == pos - 5 && get.indexOf(item.pathname.data) == 5) {
+      Serial.printf("Got %s", item.pathname.data);
       // Should I break the files up into pieces to send?
       client.println("HTTP/1.1 200 OK");
-      client.printf("Content-type:%s\n", item.file->mimeType);
+      client.printf("Content-type:%s\n", item.mimeType);
       client.println();
-      client.write(item.file->buffer, item.file->dataSize);
+      client.write(item.content.data, item.content.len);
       client.println();
       return true;
     }
