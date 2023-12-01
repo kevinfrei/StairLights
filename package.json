@@ -34,7 +34,7 @@
     "eject": "react-scripts eject",
     "format": "yarn ftool format",
     "compile": "tsc --project tsconfig.scripts.json",
-    "wrap": "yarn compile && node output/make-web-content.js"
+    "wrap": "yarn build && yarn compile && node output/make-web-content.js"
   },
   "browserslist": {
     "production": [

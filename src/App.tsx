@@ -1,14 +1,21 @@
 import React from 'react';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
+import { CallServer } from './comm';
 
-function App() {
+export function App(): JSX.Element {
+  const post = () => {
+    CallServer('info')
+      .then((v) => console.log(`Result: ${v}`))
+      .catch((r) => console.error(r));
+  };
+  // <img src={logo} className="App-logo" alt="logo" />
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <p>Click this button. I dare you!</p>
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          <button onClick={post}>Stuff</button>
         </p>
         <a
           className="App-link"
@@ -22,5 +29,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

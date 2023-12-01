@@ -66,7 +66,7 @@ bool HandleGet(const String& get, WiFiClient& client) {
     return false;
   }
   Serial.printf("Searching (pos = %d)!\n", pos);
-  for (const WebFile &item : FileList) {
+  for (const WebFile& item : FileList) {
     // Starts with 'GET /': 5 characters, right?
 
     if (item.pathname.len == pos - 5 && get.indexOf(item.pathname.data) == 5) {
@@ -84,12 +84,38 @@ bool HandleGet(const String& get, WiFiClient& client) {
   return false;
 }
 
+bool HandlePost(const String& post, WiFiClient& client) {
+  // Get the file name requested from the get line
+  Serial.println(post);
+  int32_t protocolPos = post.indexOf(" HTTP/");
+  int32_t questionPos = post.indexOf('?');
+  int32_t pos = std::max(protocolPos, questionPos);
+  if (pos < 7) {
+    Serial.printf(
+      "Nope: %s (%d, %d)\n", post.c_str(), protocolPos, questionPos);
+    return false;
+  }
+  if (post.indexOf("api_") == 6) {
+    String s = post.substring(6 + 4, pos);
+    Serial.printf("API: '%s' (%d)\n", s.c_str(), pos);
+    client.println("HTTP/1.1 200 OK");
+    client.printf("Content-type:text/plain\n");
+    client.println();
+    client.write("OK", 3);
+    client.println();
+    return true;
+  }
+  Serial.println("Nothing found");
+  return false;
+}
+
 void loop() {
   WiFiClient client = server.accept(); // listen for incoming clients
 
   if (client) { // if you get a client,
     Serial.println("New Client"); // print a message out the serial port
     String GET = "";
+    String POST = "";
     String currentLine =
       ""; // make a String to hold incoming data from the client
     while (client.connected()) { // loop while the client's connected
@@ -104,17 +130,27 @@ void loop() {
             // HTTP headers always start with a response code (e.g. HTTP/1.1 200
             // OK) and a content-type so the client knows what's coming, then a
             // blank line:
-            if (!HandleGet(GET, client)) {
-              client.println("HTTP/1.1 404 Not Found");
-              // The HTTP response ends with another blank line:
-              client.println();
+            if (GET.length() != 0) {
+              if (!HandleGet(GET, client)) {
+                client.println("HTTP/1.1 404 Not Found");
+                // The HTTP response ends with another blank line:
+                client.println();
+              }
+              GET = "";
+            } else if (POST.length() != 0) {
+              if (!HandlePost(POST, client)) {
+                client.println("HTTP/1.1 404 Not Found");
+                // The HTTP response ends with another blank line:
+                client.println();
+              }
+              POST = "";
             }
-            GET = "";
-            // break out of the while loop:
             break;
           } else {
             if (currentLine.startsWith("GET /")) {
               GET = currentLine;
+            } else if (currentLine.startsWith("POST /")) {
+              POST = currentLine;
             }
             currentLine = "";
           }
