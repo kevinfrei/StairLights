@@ -23,6 +23,7 @@ async function getFileList(): Promise<MimeFile[]> {
   await ForFiles(
     'build',
     (filename: string): boolean => {
+      // Don't include any map or txt files. They're just filler.
       if (!filename.endsWith('.map') && !filename.endsWith('.txt')) {
         const name = filename.substring(6);
         const mime = path.extname(filename).substring(1).toLowerCase();

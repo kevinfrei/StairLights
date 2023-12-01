@@ -61,7 +61,7 @@ bool HandleGet(const String& get, WiFiClient& client) {
   int32_t protocolPos = get.indexOf(" HTTP/");
   int32_t questionPos = get.indexOf('?');
   int32_t pos = std::max(protocolPos, questionPos);
-  if (pos < 6) {
+  if (pos < 5) {
     Serial.printf("Nope: %s (%d, %d)\n", get.c_str(), protocolPos, questionPos);
     return false;
   }
@@ -69,7 +69,9 @@ bool HandleGet(const String& get, WiFiClient& client) {
   for (const WebFile& item : FileList) {
     // Starts with 'GET /': 5 characters, right?
 
-    if (item.pathname.len == pos - 5 && get.indexOf(item.pathname.data) == 5) {
+    if (item.pathname.len == pos - 5 && 
+        (get.indexOf(item.pathname.data) == 5 || 
+          (item.pathname.len == 0 && protocolPos == 5))) {
       Serial.printf("Got %s", item.pathname.data);
       // Should I break the files up into pieces to send?
       client.println("HTTP/1.1 200 OK");
@@ -80,7 +82,7 @@ bool HandleGet(const String& get, WiFiClient& client) {
       return true;
     }
   }
-  Serial.println("Nothing found");
+  // Serial.println("Nothing found");
   return false;
 }
 
@@ -105,7 +107,7 @@ bool HandlePost(const String& post, WiFiClient& client) {
     client.println();
     return true;
   }
-  Serial.println("Nothing found");
+  // Serial.println("Nothing found");
   return false;
 }
 
@@ -113,7 +115,7 @@ void loop() {
   WiFiClient client = server.accept(); // listen for incoming clients
 
   if (client) { // if you get a client,
-    Serial.println("New Client"); // print a message out the serial port
+    // Serial.println("New Client"); // print a message out the serial port
     String GET = "";
     String POST = "";
     String currentLine =
@@ -121,7 +123,7 @@ void loop() {
     while (client.connected()) { // loop while the client's connected
       if (client.available()) { // if there's bytes to read from the client,
         char c = client.read(); // read a byte, then
-        Serial.write(c); // print it out the serial monitor
+        // Serial.write(c); // print it out the serial monitor
         if (c == '\n') { // if the byte is a newline character
 
           // if the current line is blank, you got two newline characters in a
@@ -174,6 +176,6 @@ void loop() {
     }
     // close the connection:
     client.stop();
-    Serial.println("Client Disconnected.");
+    // Serial.println("Client Disconnected.");
   }
 }
