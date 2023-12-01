@@ -36,23 +36,52 @@ function generatePathsList(files: MimeFile[]): PathBufInfo[] {
   const res: PathBufInfo[] = [];
   const names = new Set<string>();
   console.log('namespace Paths {');
-  files.forEach((f: MimeFile) => {
+  for (const f of files) {
     const varname = CleanPath(f.name, names);
     console.log(`  constexpr char ${varname}[] = "${f.name}";`);
     res.push({ ...f, varname, namelen: f.name.length });
-  });
+  }
   console.log('} // namespace Paths\n\n');
   return res;
+}
+
+async function writeBinaryFileContents(f: string): Promise<number> {
+  const fd = await fsp.open("build/"+f, 'r');
+  const stat = await fd.stat();
+  try {
+    let remain = stat.size;
+    let line = '    ';
+    while (remain > 0) {
+      const res = await fd.read();
+      remain -= res.bytesRead;
+      // Write the bytes, in hex, to the console
+      for (let i = 0; i < res.bytesRead; i++) {
+        const expr = `${res.buffer[i].toString(10)},`;
+        if (line.length + expr.length > 80 ) {
+          console.log(line);
+          line = '    ';
+        }
+        line += expr;
+      }
+    }
+    console.log(line);
+    console.log("  };");
+    return stat.size;
+  } finally{
+    await fd.close();
+  }
 }
 
 async function generateContents(files: PathBufInfo[]): Promise<FullBufInfo[]> {
   const res: FullBufInfo[] = [];
   console.log("namespace Contents {");
-  files.forEach((f: PathBufInfo) => {
-      console.log(`  constexpr char ${f.varname}[] = "TODO: Fill in with contents of ${f.name}";`);
-      res.push({ ...f, contentlen: 123 })
-    }
-  );
+  for (const f of files) {
+    console.log(`  constexpr char ${f.varname}[] = `);
+    // TODO: Handle text files more optimally...
+    // TODO: Also maybe compress/decompress stuff
+    const contentlen = await writeBinaryFileContents(f.name);
+    res.push({ ...f, contentlen })
+  }
   console.log("} // namespace Contents\n\n");
   return res;
 }
