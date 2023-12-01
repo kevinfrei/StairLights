@@ -76,7 +76,7 @@ async function generateContents(files: PathBufInfo[]): Promise<FullBufInfo[]> {
   const res: FullBufInfo[] = [];
   console.log("namespace Contents {");
   for (const f of files) {
-    console.log(`  constexpr char ${f.varname}[] = `);
+    console.log(`  constexpr char ${f.varname}[] = {`);
     // TODO: Handle text files more optimally...
     // TODO: Also maybe compress/decompress stuff
     const contentlen = await writeBinaryFileContents(f.name);

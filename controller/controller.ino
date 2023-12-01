@@ -58,16 +58,17 @@ void setup() {
 bool HandleGet(const String& get, WiFiClient& client) {
   // Get the file name requested from the get line
   Serial.println(get);
-  size_t protocolPos = get.indexOf(" HTTP/");
-  size_t questionPos = get.indexOf('?');
-  size_t pos = std::min(protocolPos, questionPos);
+  int32_t protocolPos = get.indexOf(" HTTP/");
+  int32_t questionPos = get.indexOf('?');
+  int32_t pos = std::max(protocolPos, questionPos);
   if (pos < 6) {
-    Serial.println("Nope");
+    Serial.printf("Nope: %s (%d, %d)\n", get.c_str(), protocolPos, questionPos);
     return false;
   }
-  Serial.printf("Searching (pos = %d)!", pos);
+  Serial.printf("Searching (pos = %d)!\n", pos);
   for (const WebFile &item : FileList) {
     // Starts with 'GET /': 5 characters, right?
+
     if (item.pathname.len == pos - 5 && get.indexOf(item.pathname.data) == 5) {
       Serial.printf("Got %s", item.pathname.data);
       // Should I break the files up into pieces to send?
@@ -108,13 +109,12 @@ void loop() {
               // The HTTP response ends with another blank line:
               client.println();
             }
+            GET = "";
             // break out of the while loop:
             break;
           } else {
             if (currentLine.startsWith("GET /")) {
               GET = currentLine;
-            } else {
-              GET = "";
             }
             currentLine = "";
           }
