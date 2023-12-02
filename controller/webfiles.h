@@ -1,5 +1,10 @@
+#if !defined(__WEB_FILES_H)
+#define __WEB_FILES_H
+
+#include <stdint.h>
+
 struct DataBuffer {
-  size_t len;
+  uint32_t len;
   const char* data;
 };
 
@@ -26,3 +31,5 @@ constexpr char txt[] = "text/plain";
 // content Probably should just #include "webcontent.h" instead of putting it
 
 #include "webcontent.h"
+
+#endif

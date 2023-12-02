@@ -11,7 +11,6 @@
     "typescript": "^5.3.2"
   },
   "devDependencies": {
-    "@freik/build-tools": "^3.6.9",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.1",
@@ -32,7 +31,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "format": "yarn ftool format",
+    "fmtjs": "yarn prettier -w scripts/*.ts src/**/*.ts src/**/*.tsx *.json *.md",
+    "fmtcpp": "clang-format -i controller/*.*",
+    "format": "yarn fmtjs && yarn fmtcpp",
     "compile": "tsc --project tsconfig.scripts.json",
     "wrap": "yarn build && yarn compile && node output/make-web-content.js"
   },

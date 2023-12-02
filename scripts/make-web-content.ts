@@ -53,13 +53,13 @@ function generatePathsList(files: MimeFile[]): PathBufInfo[] {
   const res: PathBufInfo[] = [];
   const names = new Set<string>();
   console.log('namespace Paths {');
-  console.log('  const char _root_[] = "";');
-  console.log('  const char _index_htm_[] = "index.htm";');
+  console.log('  constexpr char _root_[] = "";');
+  console.log('  constexpr char _index_htm_[] = "index.htm";');
   names.add('_root_');
   names.add('_index_htm_');
   for (const f of files) {
     const varname = CleanPath(f.name, names);
-    console.log(`  const char ${varname}[] = "${f.name}";`);
+    console.log(`  constexpr char ${varname}[] = "${f.name}";`);
     res.push({ ...f, varname, namelen: f.name.length });
   }
   console.log('} // namespace Paths\n\n');
@@ -97,7 +97,7 @@ async function generateContents(files: PathBufInfo[]): Promise<FullBufInfo[]> {
   const res: FullBufInfo[] = [];
   console.log('namespace Contents {');
   for (const f of files) {
-    console.log(`  const char ${f.varname}[] = {`);
+    console.log(`  constexpr char ${f.varname}[] = {`);
     // TODO: Handle text files more optimally...
     // TODO: Also maybe compress/decompress stuff
     const contentlen = await writeBinaryFileContents(f.name);
@@ -123,7 +123,7 @@ async function main() {
     (val: FullBufInfo) => val.name === 'index.html',
   );
   console.log(
-    `const WebFile FileList[${
+    `constexpr WebFile FileList[${
       contentInfo.length + (index !== undefined ? 2 : 0)
     }] = {`,
   );
